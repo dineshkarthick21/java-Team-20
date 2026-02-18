@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../components/CustomAlert';
+import ThemeToggle from '../components/ThemeToggle';
 import { generateBookingsPDF } from '../utils/pdfGenerator';
 
 const API_URL = 'http://localhost:8080/api';
@@ -267,25 +268,29 @@ const AdminDashboard = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Admin Dashboard</h1>
-          <p className="text-gray-600 mt-2">Manage resources and approve bookings</p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Admin Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">Manage resources and approve bookings</p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* User Profile Card */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Profile Information</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile Information</h2>
           <span className="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
             {user?.status || 'ACTIVE'}
           </span>
@@ -853,6 +858,7 @@ const AdminDashboard = () => {
           onClose={() => setAlertMessage({ message: '', type: 'info' })}
         />
       )}
+      </div>
     </div>
   );
 };

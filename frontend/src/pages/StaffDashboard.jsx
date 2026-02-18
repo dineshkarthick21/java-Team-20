@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../components/CustomAlert';
 import BookingTracker from '../components/BookingTracker';
+import ThemeToggle from '../components/ThemeToggle';
 import { generateBookingsPDF } from '../utils/pdfGenerator';
 
 const API_URL = 'http://localhost:8080/api';
@@ -38,6 +39,10 @@ const StaffDashboard = () => {
   
   // Track which bookings are expanded
   const [expandedBookings, setExpandedBookings] = useState({});
+
+  // Edit booking state
+  const [editingBooking, setEditingBooking] = useState(null);
+  const [showEditModal, setShowEditModal] = useState(false);
 
   useEffect(() => {
     fetchBookings();
@@ -260,6 +265,98 @@ const StaffDashboard = () => {
     }
   };
 
+  // Edit booking - populate form with existing data
+  const handleEditBooking = (booking) => {
+    // Extract start and end times from timeSlot (format: "HH:MM - HH:MM")
+    const [startTime, endTime] = booking.timeSlot.split(' - ');
+    
+    setEditingBooking(booking);
+    setNewBooking({
+      resourceId: booking.resourceId,
+      bookingDate: booking.bookingDate,
+      startTime: startTime,
+      endTime: endTime,
+      purpose: booking.purpose,
+    });
+    setShowEditModal(true);
+    setShowBookingForm(true);
+  };
+
+  // Update booking
+  const handleUpdateBooking = async (e) => {
+    e.preventDefault();
+    
+    // Validate that end time is after start time
+    if (newBooking.startTime && newBooking.endTime) {
+      if (newBooking.endTime <= newBooking.startTime) {
+        setAlertMessage({ message: 'End time must be after start time!', type: 'error' });
+        return;
+      }
+    }
+    
+    // Combine start and end time into timeSlot format
+    const timeSlot = `${newBooking.startTime} - ${newBooking.endTime}`;
+    
+    const bookingData = {
+      userId: user.id,
+      userRole: user.role,
+      resourceId: newBooking.resourceId,
+      bookingDate: newBooking.bookingDate,
+      timeSlot: timeSlot,
+      purpose: newBooking.purpose,
+    };
+
+    try {
+      const response = await fetch(`${API_URL}/bookings/${editingBooking.id}`, {
+        method: 'PUT',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(bookingData),
+      });
+
+      const result = await response.json();
+
+      if (response.ok && result.success) {
+        setAlertMessage({ message: 'Booking updated successfully!', type: 'success' });
+        
+        // Refresh bookings list
+        fetchMyBookings();
+        
+        // Reset form
+        setNewBooking({
+          resourceId: '',
+          bookingDate: '',
+          startTime: '',
+          endTime: '',
+          purpose: '',
+        });
+        setShowBookingForm(false);
+        setShowEditModal(false);
+        setEditingBooking(null);
+      } else {
+        setAlertMessage({ message: 'Error: ' + (result.message || 'Unknown error'), type: 'error' });
+      }
+    } catch (error) {
+      console.error('Error updating booking:', error);
+      setAlertMessage({ message: 'Failed to update booking. Please ensure backend is running.', type: 'error' });
+    }
+  };
+
+  // Cancel editing
+  const handleCancelEdit = () => {
+    setEditingBooking(null);
+    setShowEditModal(false);
+    setShowBookingForm(false);
+    setNewBooking({
+      resourceId: '',
+      bookingDate: '',
+      startTime: '',
+      endTime: '',
+      purpose: '',
+    });
+  };
+
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/signin');
@@ -281,27 +378,31 @@ const StaffDashboard = () => {
   };
 
   return (
-    <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+    <div className="min-h-screen bg-gray-50 dark:bg-gray-900 transition-colors duration-300">
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
       {/* Header */}
       <div className="mb-8 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Staff Dashboard</h1>
-          <p className="text-gray-600 mt-2">
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Staff Dashboard</h1>
+          <p className="text-gray-600 dark:text-gray-300 mt-2">
             {activeTab === 'review' ? 'Review and approve student booking requests' : 'Manage your resource bookings'}
           </p>
         </div>
-        <button
-          onClick={handleLogout}
-          className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-4">
+          <ThemeToggle />
+          <button
+            onClick={handleLogout}
+            className="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold"
+          >
+            Logout
+          </button>
+        </div>
       </div>
 
       {/* User Profile Card */}
-      <div className="bg-white rounded-xl shadow-md p-6 mb-8">
+      <div className="bg-white dark:bg-gray-800 rounded-xl shadow-md p-6 mb-8">
         <div className="flex items-center justify-between mb-6">
-          <h2 className="text-2xl font-bold text-gray-900">Profile Information</h2>
+          <h2 className="text-2xl font-bold text-gray-900 dark:text-white">Profile Information</h2>
           <span className="px-4 py-2 rounded-full text-sm font-semibold bg-green-100 text-green-800">
             {user.status || 'ACTIVE'}
           </span>
@@ -569,7 +670,13 @@ const StaffDashboard = () => {
                 Download PDF
               </button>
               <button
-                onClick={() => setShowBookingForm(!showBookingForm)}
+                onClick={() => {
+                  if (editingBooking) {
+                    handleCancelEdit();
+                  } else {
+                    setShowBookingForm(!showBookingForm);
+                  }
+                }}
                 className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
               >
                 {showBookingForm ? 'Cancel' : '+ New Booking'}
@@ -579,7 +686,7 @@ const StaffDashboard = () => {
 
           {/* Booking Form */}
           {showBookingForm && (
-            <form onSubmit={handleSubmitBooking} className="bg-white rounded-xl shadow-md p-6 mb-6">
+            <form onSubmit={editingBooking ? handleUpdateBooking : handleSubmitBooking} className="bg-white rounded-xl shadow-md p-6 mb-6">
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                 <div>
                   <label htmlFor="resourceId" className="block text-sm font-medium text-gray-700 mb-2">
@@ -665,12 +772,21 @@ const StaffDashboard = () => {
                 </div>
               </div>
 
-              <div className="mt-6">
+              <div className="mt-6 flex justify-end gap-3">
+                {editingBooking && (
+                  <button
+                    type="button"
+                    onClick={handleCancelEdit}
+                    className="px-6 py-3 bg-gray-500 text-white font-semibold rounded-lg hover:bg-gray-600 transition-colors"
+                  >
+                    Cancel Edit
+                  </button>
+                )}
                 <button
                   type="submit"
-                  className="w-full px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+                  className="px-6 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
                 >
-                  Submit Booking Request
+                  {editingBooking ? 'Update Booking' : 'Submit Booking Request'}
                 </button>
               </div>
             </form>
@@ -789,6 +905,20 @@ const StaffDashboard = () => {
                       
                       {/* Action Buttons */}
                       <div className="flex items-center gap-2">
+                        {/* Edit Button - Only show for APPLIED (before staff/admin approval) */}
+                        {booking.status === 'APPLIED' && (
+                          <button
+                            onClick={() => handleEditBooking(booking)}
+                            className="flex items-center space-x-1 px-3 py-2 bg-yellow-600 text-white rounded-lg hover:bg-yellow-700 transition-colors text-sm font-semibold shadow-sm hover:shadow-md"
+                            title="Edit booking"
+                          >
+                            <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
+                            </svg>
+                            <span>Edit</span>
+                          </button>
+                        )}
+                        
                         {/* Delete Button - Only show for REJECTED, APPROVED, or ADMIN_APPROVED */}
                         {(booking.status === 'REJECTED' || booking.status === 'APPROVED' || booking.status === 'ADMIN_APPROVED') && (
                           <button
@@ -903,6 +1033,7 @@ const StaffDashboard = () => {
           onClose={() => setAlertMessage({ message: '', type: 'info' })}
         />
       )}
+      </div>
     </div>
   );
 };

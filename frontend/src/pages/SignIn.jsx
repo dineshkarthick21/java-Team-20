@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link, useSearchParams } from 'react-router-dom';
 import CustomAlert from '../components/CustomAlert';
+import ThemeToggle from '../components/ThemeToggle';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -114,7 +115,12 @@ const SignIn = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 flex items-center justify-center px-4 sm:px-6 lg:px-8">
+    <div className="min-h-screen bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800 flex items-center justify-center px-4 sm:px-6 lg:px-8 transition-colors duration-300">
+      {/* Theme Toggle - Top Right */}
+      <div className="absolute top-4 right-4">
+        <ThemeToggle />
+      </div>
+      
       <div className="max-w-md w-full">
         {/* Logo/Header */}
         <div className="text-center mb-8">
@@ -125,12 +131,12 @@ const SignIn = () => {
               </svg>
             </div>
           </div>
-          <h2 className="text-3xl font-bold text-gray-900">Welcome Back!</h2>
-          <p className="mt-2 text-sm text-gray-600">Sign in to Campus Resource Management</p>
+          <h2 className="text-3xl font-bold text-gray-900 dark:text-white">Welcome Back!</h2>
+          <p className="mt-2 text-sm text-gray-600 dark:text-gray-300">Sign in to Campus Resource Management</p>
         </div>
 
         {/* Sign In Form */}
-        <div className="bg-white rounded-2xl shadow-xl p-8">
+        <div className="bg-white dark:bg-gray-800 rounded-2xl shadow-xl p-8">
           <form onSubmit={handleSubmit} className="space-y-6">
             {/* Role Selection */}
             <div>

@@ -302,4 +302,46 @@ public class BookingService {
         
         bookingRepository.delete(booking);
     }
+    
+    @Transactional
+    public BookingResponse updateBooking(String id, BookingRequest request) {
+        Booking booking = bookingRepository.findById(id)
+            .orElseThrow(() -> new RuntimeException("Booking not found"));
+        
+        // Only allow updates for APPLIED bookings (before staff/admin approval)
+        if (booking.getStatus() != Booking.BookingStatus.APPLIED) {
+            throw new RuntimeException("Cannot edit a booking after it has been approved or rejected");
+        }
+        
+        // Verify resource exists
+        Resource resource = resourceRepository.findById(request.getResourceId())
+            .orElseThrow(() -> new RuntimeException("Resource not found"));
+        
+        // Check if another user has an approved booking for the new time slot (if changed)
+        if (!booking.getResourceId().equals(request.getResourceId()) ||
+            !booking.getBookingDate().equals(request.getBookingDate()) ||
+            !booking.getTimeSlot().equals(request.getTimeSlot())) {
+            
+            List<Booking> existingBookings = bookingRepository.findByResourceIdAndBookingDateAndTimeSlot(
+                request.getResourceId(), request.getBookingDate(), request.getTimeSlot());
+            
+            boolean isApprovedForOtherUser = existingBookings.stream()
+                .anyMatch(b -> !b.getId().equals(id) && 
+                              (b.getStatus() == Booking.BookingStatus.ADMIN_APPROVED || 
+                               b.getStatus() == Booking.BookingStatus.STAFF_APPROVED));
+            
+            if (isApprovedForOtherUser) {
+                throw new RuntimeException("Sorry! This resource has been approved for another user at this date and time slot.");
+            }
+        }
+        
+        // Update booking details
+        booking.setResourceId(request.getResourceId());
+        booking.setBookingDate(request.getBookingDate());
+        booking.setTimeSlot(request.getTimeSlot());
+        booking.setPurpose(request.getPurpose());
+        
+        Booking updatedBooking = bookingRepository.save(booking);
+        return mapToBookingResponse(updatedBooking);
+    }
 }

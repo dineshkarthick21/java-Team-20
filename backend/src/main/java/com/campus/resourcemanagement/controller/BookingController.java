@@ -124,6 +124,23 @@ public class BookingController {
         }
     }
     
+    @PutMapping("/{id}")
+    public ResponseEntity<?> updateBooking(@PathVariable String id, @Valid @RequestBody BookingRequest request) {
+        try {
+            BookingResponse booking = bookingService.updateBooking(id, request);
+            Map<String, Object> response = new HashMap<>();
+            response.put("success", true);
+            response.put("message", "Booking updated successfully");
+            response.put("booking", booking);
+            return ResponseEntity.ok(response);
+        } catch (Exception e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", e.getMessage());
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(error);
+        }
+    }
+    
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteBooking(@PathVariable String id) {
         try {
