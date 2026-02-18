@@ -7,7 +7,9 @@ A comprehensive web application for managing campus resources (labs, classrooms,
 - **Role-Based Access Control**: Student, Staff, and Admin dashboards
 - **3-Step Approval Process**: Applied → Staff Approved → Admin Approved
 - **Real-Time Booking Tracker**: Flipkart-style progress visualization
+- **Edit Booking**: Modify booking details before staff/admin approval
 - **PDF Download**: Export booking details to PDF from all dashboards
+- **Dark/Light Theme**: Toggle between dark and light modes with persistent preference
 - **Resource Management**: CRUD operations for campus resources
 - **User Management**: Student activation/deactivation and account unblocking
 - **Booking Lifecycle**: Complete booking workflow with approval/rejection
@@ -148,6 +150,7 @@ Frontend will run on: `http://localhost:3000`
 | GET | `/api/bookings/user/{userId}` | Get bookings by user ID |
 | GET | `/api/bookings/status/{status}` | Get bookings by status |
 | POST | `/api/bookings` | Create new booking |
+| PUT | `/api/bookings/{id}` | Update booking (only APPLIED status) |
 | PATCH | `/api/bookings/{id}/staff-approve` | Staff approve booking |
 | PATCH | `/api/bookings/{id}/admin-approve` | Admin approve booking |
 | PATCH | `/api/bookings/{id}/reject` | Reject booking |
@@ -161,10 +164,18 @@ APPLIED → STAFF_APPROVED → ADMIN_APPROVED
         REJECTED (at any stage)
 ```
 
+### Edit Booking Rules
+
+- **Editable**: APPLIED status only (before staff approval)
+- **Not Editable**: STAFF_APPROVED, ADMIN_APPROVED, or REJECTED
+- **Edit Button Visibility**: Yellow edit button appears only for APPLIED bookings
+- **Validation**: Prevents editing to time slots already approved for other users
+
 ## 👥 User Roles
 
 ### Student
 - Create booking requests
+- Edit bookings before staff approval (APPLIED status only)
 - View own bookings
 - Track booking status with visual progress bar
 - Download personal bookings as PDF
@@ -173,6 +184,7 @@ APPLIED → STAFF_APPROVED → ADMIN_APPROVED
 - View all bookings
 - Approve/reject booking requests
 - First level of approval
+- Edit own bookings before approval (APPLIED status only)
 - Download review bookings and personal bookings as PDF
 
 ### Admin
@@ -185,8 +197,11 @@ APPLIED → STAFF_APPROVED → ADMIN_APPROVED
 ## 🎨 UI Features
 
 - **Booking Tracker**: Horizontal progress visualization (similar to Flipkart order tracking)
+- **Edit Booking**: Yellow edit button appears for APPLIED bookings, hidden after staff/admin approval
 - **PDF Export**: Download booking details as formatted PDF with summary statistics
+- **Dark/Light Theme**: Animated theme toggle button with persistent localStorage preference
 - **Color-Coded Status**: Visual feedback for different booking states
+- **Conditional Actions**: Dynamic button visibility based on booking status
 - **Responsive Tables**: Mobile-friendly data display
 - **Role-Based Navigation**: Different dashboards per user role
 - **Real-time Updates**: Instant status changes
