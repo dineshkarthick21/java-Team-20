@@ -7,6 +7,7 @@ A comprehensive web application for managing campus resources (labs, classrooms,
 - **Role-Based Access Control**: Student, Staff, and Admin dashboards
 - **3-Step Approval Process**: Applied → Staff Approved → Admin Approved
 - **Real-Time Booking Tracker**: Flipkart-style progress visualization
+- **PDF Download**: Export booking details to PDF from all dashboards
 - **Resource Management**: CRUD operations for campus resources
 - **User Management**: Student activation/deactivation and account unblocking
 - **Booking Lifecycle**: Complete booking workflow with approval/rejection
@@ -26,6 +27,7 @@ A comprehensive web application for managing campus resources (labs, classrooms,
 - **Tailwind CSS**
 - **React Router DOM**
 - **Heroicons**
+- **jsPDF & jsPDF-AutoTable** (PDF generation)
 
 ## 📁 Project Structure
 
@@ -165,21 +167,25 @@ APPLIED → STAFF_APPROVED → ADMIN_APPROVED
 - Create booking requests
 - View own bookings
 - Track booking status with visual progress bar
+- Download personal bookings as PDF
 
 ### Staff
 - View all bookings
 - Approve/reject booking requests
 - First level of approval
+- Download review bookings and personal bookings as PDF
 
 ### Admin
 - Complete resource management (CRUD)
 - Final booking approval
 - User management (activate/deactivate students)
 - Unblock student accounts
+- Download comprehensive booking reports as PDF
 
 ## 🎨 UI Features
 
 - **Booking Tracker**: Horizontal progress visualization (similar to Flipkart order tracking)
+- **PDF Export**: Download booking details as formatted PDF with summary statistics
 - **Color-Coded Status**: Visual feedback for different booking states
 - **Responsive Tables**: Mobile-friendly data display
 - **Role-Based Navigation**: Different dashboards per user role

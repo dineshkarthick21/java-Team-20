@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import CustomAlert from '../components/CustomAlert';
 import BookingTracker from '../components/BookingTracker';
+import { generateBookingsPDF } from '../utils/pdfGenerator';
 
 const API_URL = 'http://localhost:8080/api';
 
@@ -203,6 +204,36 @@ const StaffDashboard = () => {
       [bookingId]: !prev[bookingId]
     }));
   };
+
+  // Download review bookings as PDF
+  const handleDownloadReviewPDF = () => {
+    if (bookings.length === 0) {
+      setAlertMessage({ message: 'No bookings to download!', type: 'warning' });
+      return;
+    }
+    
+    const fileName = `review-bookings-${new Date().toISOString().split('T')[0]}.pdf`;
+    generateBookingsPDF(bookings, fileName, {
+      title: 'Booking Review List',
+      userName: user?.name || 'Staff'
+    });
+    setAlertMessage({ message: 'PDF downloaded successfully!', type: 'success' });
+  };
+
+  // Download my bookings as PDF
+  const handleDownloadMyBookingsPDF = () => {
+    if (myBookings.length === 0) {
+      setAlertMessage({ message: 'No bookings to download!', type: 'warning' });
+      return;
+    }
+    
+    const fileName = `my-bookings-${new Date().toISOString().split('T')[0]}.pdf`;
+    generateBookingsPDF(myBookings, fileName, {
+      title: 'My Bookings',
+      userName: user?.name || 'Staff'
+    });
+    setAlertMessage({ message: 'PDF downloaded successfully!', type: 'success' });
+  };
   
   // Delete booking
   const handleDeleteBooking = async (bookingId) => {
@@ -333,19 +364,28 @@ const StaffDashboard = () => {
       {activeTab === 'review' && (
         <div>
           {/* Filter */}
-          <div className="mb-6 flex gap-4">
-        <select
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
-          className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
-        >
-          <option value="APPLIED">Applied (Pending Review)</option>
-          <option value="ALL">All Bookings</option>
-          <option value="STAFF_APPROVED">Staff Approved</option>
-          <option value="ADMIN_APPROVED">Admin Approved</option>
-          <option value="REJECTED">Rejected</option>
-        </select>
-      </div>
+          <div className="mb-6 flex gap-4 items-center justify-between">
+            <select
+              value={filterStatus}
+              onChange={(e) => setFilterStatus(e.target.value)}
+              className="px-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="APPLIED">Applied (Pending Review)</option>
+              <option value="ALL">All Bookings</option>
+              <option value="STAFF_APPROVED">Staff Approved</option>
+              <option value="ADMIN_APPROVED">Admin Approved</option>
+              <option value="REJECTED">Rejected</option>
+            </select>
+            <button
+              onClick={handleDownloadReviewPDF}
+              className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+            >
+              <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Download PDF
+            </button>
+          </div>
 
       {/* Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4 mb-8">
@@ -518,12 +558,23 @@ const StaffDashboard = () => {
         <div>
           <div className="mb-6 flex justify-between items-center">
             <h2 className="text-2xl font-bold text-gray-900">My Resource Bookings</h2>
-            <button
-              onClick={() => setShowBookingForm(!showBookingForm)}
-              className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
-            >
-              {showBookingForm ? 'Cancel' : '+ New Booking'}
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleDownloadMyBookingsPDF}
+                className="flex items-center gap-2 px-4 py-2 bg-green-600 text-white font-semibold rounded-lg hover:bg-green-700 transition-colors"
+              >
+                <svg className="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+                </svg>
+                Download PDF
+              </button>
+              <button
+                onClick={() => setShowBookingForm(!showBookingForm)}
+                className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors font-semibold"
+              >
+                {showBookingForm ? 'Cancel' : '+ New Booking'}
+              </button>
+            </div>
           </div>
 
           {/* Booking Form */}
