@@ -1,6 +1,6 @@
 # Campus Resource Management System
 
-A comprehensive web application for managing campus resources (labs, classrooms, event halls, computers) with a role-based booking system featuring Student, Staff, and Admin workflows.
+A full-stack web application for managing campus resources such as labs, classrooms, event halls, and computers. The system provides role-based booking workflows for Students, Staff, and Admins.
 
 ## 🌟 Features
 
@@ -77,11 +77,13 @@ A comprehensive web application for managing campus resources (labs, classrooms,
 cd backend
 ```
 
-2. Update MongoDB connection (if needed) in `src/main/resources/application.properties`:
+2. Configure MongoDB in `src/main/resources/application.properties`:
 ```properties
 spring.data.mongodb.uri=your-mongodb-connection-string
 spring.data.mongodb.database=campusdb
 ```
+
+Do not commit real database credentials to source control. Use a local or environment-specific configuration when running the application.
 
 3. Build and run:
 ```bash
@@ -112,6 +114,19 @@ npm run dev
 ```
 
 Frontend will run on: `http://localhost:3000`
+
+### Application Routes
+
+| Route | Purpose |
+|-------|---------|
+| `/` | Landing page |
+| `/signin` | Sign in with a selected role |
+| `/signup` | Create a user account |
+| `/student` | Student dashboard |
+| `/staff` | Staff dashboard |
+| `/admin` | Admin dashboard |
+
+Dashboard routes require an authenticated user. The frontend stores the signed-in user in browser local storage and redirects unauthenticated users to the sign-in page.
 
 ## 📡 API Endpoints
 
@@ -204,7 +219,13 @@ APPLIED → STAFF_APPROVED → ADMIN_APPROVED
 - **Conditional Actions**: Dynamic button visibility based on booking status
 - **Responsive Tables**: Mobile-friendly data display
 - **Role-Based Navigation**: Different dashboards per user role
-- **Real-time Updates**: Instant status changes
+- **Live UI Updates**: Dashboard data refreshes after booking and approval actions
+
+## 🔧 Configuration
+
+The backend listens on port `8080` and the frontend listens on port `3000`. The backend CORS configuration allows requests from `http://localhost:3000`.
+
+For a different frontend origin, update both `cors.allowed.origins` in `backend/src/main/resources/application.properties` and the controller-level CORS settings before starting the application.
 
 ## 🗄️ Database
 
